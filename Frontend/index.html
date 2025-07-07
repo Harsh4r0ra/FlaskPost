@@ -5,115 +5,272 @@
     <link rel="icon" href="/assets/favicon-16x16.png" sizes="16x16" type="image/png">
     <link rel="icon" href="/assets/favicon-32x32.png" sizes="32x32" type="image/png">
     <link rel="icon" href="/assets/favicon-96x96.png" sizes="96x96" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FlaskPost - Mass Mailer</title>
+    <title>Mass Mailer - Bulk Email Sender</title>
     <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --secondary-color: #10b981;
+            --accent-color: #f59e0b;
+            --background: #0f172a;
+            --surface: #1e293b;
+            --surface-light: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --border: #334155;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            --radius: 12px;
+            --radius-lg: 16px;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            transition: all 0.3s ease;
         }
 
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #0d0d0d;
-            color: #e5e5e5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-            position: relative;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--background) 0%, #1e1b4b 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr;
-            grid-gap: 20px;
-            width: 100vw;
-            height: 100vh;
-            background-color: #161616;
-            border-radius: 0;
-            padding: 20px;
-            box-shadow: none;
-        }
-
-        .editor,
-        .preview {
-            background-color: #1f1f1f;
-            border-radius: 0;
-            padding: 20px;
-            box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.5);
+        .app-container {
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            height: 100%;
         }
 
-        .editor h2,
-        .preview h2 {
-            color: #00cba9;
-            font-size: 28px;
-            margin-bottom: 15px;
+        .header {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        .editor textarea,
-        .editor input {
-            width: 100%;
-            margin-bottom: 15px;
-            padding: 15px;
-            background-color: #292929;
-            border: none;
-            border-radius: 12px;
-            color: #e5e5e5;
-            font-size: 16px;
-        }
-
-        .editor textarea {
-            height: 200px;
-            resize: vertical;
-        }
-
-        .editor button,
-        .file-upload button {
-            background-color: #00cba9;
-            color: #fff;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            flex: 1;
-            margin: 0;
-        }
-
-        .editor button:hover,
-        .file-upload button:hover {
-            background-color: #00a17f;
-        }
-
-        .editor input:focus,
-        .editor textarea:focus {
-            outline: 2px solid #00cba9;
-        }
-
-        .button-container {
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            margin-top: auto;
-            gap: 10px;
         }
 
-        .preview iframe {
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .logo i {
+            font-size: 2rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: var(--radius);
+            color: var(--secondary-color);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .main-content {
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
             width: 100%;
-            height: calc(100% - 60px);
-            border-radius: 12px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            height: calc(100vh - 200px);
+            min-height: 600px;
+        }
+
+        .panel {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .panel:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .panel-header i {
+            font-size: 1.25rem;
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(51, 65, 85, 0.5);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            background: rgba(51, 65, 85, 0.8);
+        }
+
+        .form-textarea {
+            min-height: 200px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: auto;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.875rem 1.5rem;
             border: none;
-            background-color: #121212;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(51, 65, 85, 0.8);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(51, 65, 85, 1);
+            color: var(--text-primary);
+        }
+
+        .btn-success {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+        }
+
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .preview-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-frame {
+            flex: 1;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: white;
+            overflow: hidden;
+        }
+
+        .preview-frame iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
         }
 
         .modal {
@@ -124,116 +281,473 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
             justify-content: center;
             align-items: center;
-            z-index: 999;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .modal-content {
-            background-color: #1f1f1f;
-            padding: 20px;
-            border-radius: 12px;
-            width: 400px;
-            max-width: 90%;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-            color: #e5e5e5;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
             display: flex;
-            flex-direction: column;
-        }
-
-        .modal-content h3 {
-            margin-bottom: 15px;
-            color: #00cba9;
-            text-align: center;
-        }
-
-        .modal input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 10px;
-            background-color: #292929;
-            border: none;
-            border-radius: 8px;
-            color: #e5e5e5;
-            font-size: 14px;
-        }
-
-        .modal-buttons {
-            display: flex;
+            align-items: center;
             justify-content: space-between;
-            margin-top: 15px;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
         }
 
-        .modal-buttons button {
-            flex: 1;
-            padding: 12px;
-            background-color: #00cba9;
+        .modal-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            background: none;
             border: none;
-            border-radius: 8px;
+            color: var(--text-muted);
+            font-size: 1.5rem;
             cursor: pointer;
-            margin: 0 5px;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
         }
 
-        .modal-buttons button:hover {
-            background-color: #00a17f;
+        .modal-close:hover {
+            color: var(--text-primary);
+            background: rgba(51, 65, 85, 0.5);
         }
 
         .toast {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #00cba9;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem 1.5rem;
+            color: var(--text-primary);
+            box-shadow: var(--shadow-lg);
+            z-index: 1001;
             opacity: 0;
-            transition: opacity 0.5s ease, top 0.5s ease;
-            z-index: 1000;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            max-width: 400px;
         }
 
         .toast.show {
             opacity: 1;
-            top: 30px;
+            transform: translateX(0);
         }
+
+        .toast.success {
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .toast.error {
+            border-left: 4px solid #ef4444;
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(51, 65, 85, 0.5);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .header {
+                padding: 1rem;
+            }
+        }
+
+                 @media (max-width: 768px) {
+             .button-group {
+                 flex-direction: column;
+             }
+             
+             .btn {
+                 justify-content: center;
+             }
+             
+             .panel {
+                 padding: 1.5rem;
+             }
+         }
+
+         .footer {
+             background: rgba(30, 41, 59, 0.8);
+             backdrop-filter: blur(20px);
+             border-top: 1px solid var(--border);
+             padding: 1.5rem 2rem;
+             margin-top: auto;
+         }
+
+         .footer-content {
+             max-width: 1400px;
+             margin: 0 auto;
+             text-align: center;
+         }
+
+         .footer p {
+             color: var(--text-secondary);
+             font-size: 0.875rem;
+             margin: 0;
+         }
+
+         .footer a {
+             color: var(--primary-color);
+             text-decoration: none;
+             font-weight: 500;
+             transition: all 0.3s ease;
+         }
+
+         .footer a:hover {
+             color: var(--primary-hover);
+             text-decoration: underline;
+         }
+
+         .html-editor-container {
+             position: relative;
+         }
+
+         .expand-btn {
+             position: absolute;
+             top: 0.5rem;
+             right: 0.5rem;
+             padding: 0.5rem 1rem;
+             font-size: 0.75rem;
+             background: rgba(99, 102, 241, 0.1);
+             border: 1px solid var(--primary-color);
+             color: var(--primary-color);
+             z-index: 10;
+         }
+
+         .expand-btn:hover {
+             background: rgba(99, 102, 241, 0.2);
+             color: var(--primary-color);
+         }
+
+         .editor-modal {
+             display: none;
+             position: fixed;
+             top: 0;
+             left: 0;
+             width: 100%;
+             height: 100%;
+             background: rgba(0, 0, 0, 0.8);
+             backdrop-filter: blur(10px);
+             justify-content: center;
+             align-items: center;
+             z-index: 1000;
+             animation: fadeIn 0.3s ease;
+         }
+
+         .editor-modal-content {
+             background: var(--surface);
+             border: 1px solid var(--border);
+             border-radius: var(--radius-lg);
+             width: 95%;
+             height: 90%;
+             max-width: 1200px;
+             display: flex;
+             flex-direction: column;
+             box-shadow: var(--shadow-lg);
+             animation: slideUp 0.3s ease;
+         }
+
+         .editor-modal-header {
+             display: flex;
+             align-items: center;
+             justify-content: space-between;
+             padding: 1.5rem 2rem;
+             border-bottom: 1px solid var(--border);
+             background: rgba(30, 41, 59, 0.5);
+         }
+
+         .editor-modal-header h3 {
+             font-size: 1.25rem;
+             font-weight: 600;
+             color: var(--text-primary);
+             display: flex;
+             align-items: center;
+             gap: 0.5rem;
+         }
+
+         .editor-modal-close {
+             background: none;
+             border: none;
+             color: var(--text-muted);
+             font-size: 1.5rem;
+             cursor: pointer;
+             padding: 0.5rem;
+             border-radius: 4px;
+             transition: all 0.3s ease;
+         }
+
+         .editor-modal-close:hover {
+             color: var(--text-primary);
+             background: rgba(51, 65, 85, 0.5);
+         }
+
+         .editor-modal-body {
+             flex: 1;
+             padding: 2rem;
+             display: flex;
+             flex-direction: column;
+             gap: 1rem;
+         }
+
+         .editor-fullscreen {
+             flex: 1;
+             min-height: 400px;
+             resize: none;
+             font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+             font-size: 14px;
+             line-height: 1.5;
+         }
+
+         .editor-actions {
+             display: flex;
+             gap: 1rem;
+             justify-content: flex-end;
+             padding-top: 1rem;
+             border-top: 1px solid var(--border);
+         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="editor">
-            <h2>HTML Editor</h2>
-            <form action="/send_emails" method="post" id="emailForm" enctype="multipart/form-data">
-                <textarea id="htmlInput" name="htmlContent" placeholder="Write or paste your HTML here..."></textarea>
-                <input type="text" name="subject" placeholder="Email Subject" required>
-                <input type="text" name="senderName" placeholder="Sender Name" required>
-                <input type="file" id="csvInput" name="csvFile" accept=".csv" style="display: none;">
-                <div class="button-container">
-                    <button type="button" id="smtpButton">Configure SMTP</button>
-                    <button type="button" id="uploadButton">Upload CSV</button>
-                    <button type="submit">Send Emails</button>
+    <div class="app-container">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-envelope"></i>
+                    Mass Mailer
                 </div>
-            </form>
-        </div>
-        <div class="preview">
-            <h2>Email Preview</h2>
-            <iframe id="emailPreview" srcdoc=""></iframe>
+                <div class="status-indicator">
+                    <i class="fas fa-circle"></i>
+                    <span>Ready to send</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="dashboard">
+                <div class="panel">
+                    <div class="panel-header">
+                        <i class="fas fa-edit"></i>
+                        <h2>Email Editor</h2>
+                    </div>
+                    
+                    <form id="emailForm" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-code"></i> HTML Content
+                            </label>
+                            <div class="html-editor-container">
+                                <textarea 
+                                    id="htmlInput" 
+                                    name="htmlContent" 
+                                    class="form-input form-textarea" 
+                                    placeholder="Write your HTML email content here...&#10;&#10;You can use variables like {{Name}}, {{Email}}, etc. from your CSV file."
+                                ></textarea>
+                                <button type="button" id="expandEditor" class="btn btn-secondary expand-btn">
+                                    <i class="fas fa-expand"></i>
+                                    Expand Editor
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="subject">
+                                <i class="fas fa-tag"></i> Email Subject
+                            </label>
+                            <input type="text" id="subject" name="subject" class="form-input" placeholder="Enter email subject" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="senderName">
+                                <i class="fas fa-user"></i> Sender Name
+                            </label>
+                            <input type="text" id="senderName" name="senderName" class="form-input" placeholder="Enter sender name" required>
+                        </div>
+
+                        <div class="button-group">
+                            <button type="button" id="smtpButton" class="btn btn-secondary">
+                                <i class="fas fa-cog"></i>
+                                Configure SMTP
+                            </button>
+                            <div class="file-upload">
+                                <input type="file" id="csvInput" name="csvFile" accept=".csv" class="file-input">
+                                <button type="button" id="uploadButton" class="btn btn-secondary">
+                                    <i class="fas fa-upload"></i>
+                                    Upload CSV
+                                </button>
+                            </div>
+                            <button type="submit" id="sendButton" class="btn btn-success">
+                                <i class="fas fa-paper-plane"></i>
+                                Send Emails
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <i class="fas fa-eye"></i>
+                        <h2>Email Preview</h2>
+                    </div>
+                    
+                    <div class="preview-container">
+                        <div class="preview-frame">
+                            <iframe id="emailPreview" srcdoc="<div style='display: flex; align-items: center; justify-content: center; height: 100%; color: #64748b; font-family: Inter, sans-serif;'><i class='fas fa-eye' style='font-size: 2rem; margin-right: 0.5rem;'></i>Preview your email here</div>"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="footer">
+            <div class="footer-content">
+                <p>Made with ❤️ by <a href="https://harsharora.xyz" target="_blank" rel="noopener noreferrer">Harsh Arora</a></p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- HTML Editor Modal -->
+    <div class="editor-modal" id="editorModal">
+        <div class="editor-modal-content">
+            <div class="editor-modal-header">
+                <h3><i class="fas fa-code"></i> HTML Email Editor</h3>
+                <button type="button" class="editor-modal-close" id="closeEditorModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="editor-modal-body">
+                <textarea 
+                    id="htmlInputFullscreen" 
+                    class="form-input editor-fullscreen" 
+                    placeholder="Write your HTML email content here...&#10;&#10;You can use variables like {{Name}}, {{Email}}, etc. from your CSV file."
+                ></textarea>
+                <div class="editor-actions">
+                    <button type="button" id="saveEditorContent" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Save & Close
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Modal for SMTP Configuration -->
+    <!-- SMTP Configuration Modal -->
     <div class="modal" id="smtpModal">
         <div class="modal-content">
-            <h3>Configure SMTP</h3>
+            <div class="modal-header">
+                <h3><i class="fas fa-cog"></i> Configure SMTP Settings</h3>
+                <button type="button" class="modal-close" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
             <form id="smtpForm">
-                <input type="text" id="smtpHost" placeholder="SMTP Host" required>
-                <input type="number" id="smtpPort" placeholder="SMTP Port" required>
-                <input type="text" id="smtpUser" placeholder="SMTP Username" required>
-                <input type="password" id="smtpPass" placeholder="SMTP Password" required>
-                <div class="modal-buttons">
-                    <button type="button" id="saveSmtp">Save</button>
-                    <button type="button" id="closeModal">Close</button>
+                <div class="form-group">
+                    <label class="form-label" for="smtpHost">
+                        <i class="fas fa-server"></i> SMTP Host
+                    </label>
+                    <input type="text" id="smtpHost" class="form-input" placeholder="e.g., smtp.gmail.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="smtpPort">
+                        <i class="fas fa-network-wired"></i> SMTP Port
+                    </label>
+                    <input type="number" id="smtpPort" class="form-input" placeholder="e.g., 587" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="smtpUser">
+                        <i class="fas fa-user"></i> SMTP Username
+                    </label>
+                    <input type="text" id="smtpUser" class="form-input" placeholder="Your email address" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="smtpPass">
+                        <i class="fas fa-lock"></i> SMTP Password
+                    </label>
+                    <input type="password" id="smtpPass" class="form-input" placeholder="Your password or app password" required>
+                </div>
+                
+                <div class="button-group">
+                    <button type="button" id="saveSmtp" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Save Configuration
+                    </button>
                 </div>
             </form>
         </div>
@@ -242,78 +756,227 @@
     <div class="toast" id="toast"></div>
 
     <script>
+        // HTML Editor Modal handling
+        document.getElementById("expandEditor").onclick = function() {
+            const modal = document.getElementById("editorModal");
+            const fullscreenTextarea = document.getElementById("htmlInputFullscreen");
+            const originalTextarea = document.getElementById("htmlInput");
+            
+            // Copy content from original textarea to fullscreen
+            fullscreenTextarea.value = originalTextarea.value;
+            modal.style.display = "flex";
+            
+            // Focus on the fullscreen textarea
+            setTimeout(() => {
+                fullscreenTextarea.focus();
+            }, 100);
+        };
 
-        document.getElementById("uploadButton").onclick = function () {
+        document.getElementById("closeEditorModal").onclick = function() {
+            document.getElementById("editorModal").style.display = "none";
+        };
+
+        // Close editor modal when clicking outside
+        document.getElementById("editorModal").onclick = function(event) {
+            if (event.target === this) {
+                this.style.display = "none";
+            }
+        };
+
+        // Save content from fullscreen editor back to original
+        document.getElementById("saveEditorContent").onclick = function() {
+            const fullscreenTextarea = document.getElementById("htmlInputFullscreen");
+            const originalTextarea = document.getElementById("htmlInput");
+            
+            originalTextarea.value = fullscreenTextarea.value;
+            originalTextarea.dispatchEvent(new Event('input')); // Trigger preview update
+            
+            document.getElementById("editorModal").style.display = "none";
+            showToast("Content saved successfully!", 'success');
+        };
+
+        // File upload handling
+        document.getElementById("uploadButton").onclick = function() {
             document.getElementById("csvInput").click();
         };
 
-        document.getElementById("csvInput").onchange = function (event) {
-            const fileName = event.target.files[0] ? event.target.files[0].name : "No file chosen";
-            showToast("Selected file: " + fileName);
+        document.getElementById("csvInput").onchange = function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                showToast(`Selected file: ${file.name}`, 'info');
+                document.getElementById("uploadButton").innerHTML = `<i class="fas fa-check"></i> ${file.name}`;
+            }
         };
 
-        document.getElementById("smtpButton").onclick = function () {
+        // SMTP Modal handling
+        document.getElementById("smtpButton").onclick = function() {
             document.getElementById("smtpModal").style.display = "flex";
         };
 
-        document.getElementById("closeModal").onclick = function () {
+        document.getElementById("closeModal").onclick = function() {
             document.getElementById("smtpModal").style.display = "none";
         };
 
-        document.getElementById("saveSmtp").onclick = function () {
+        // Close modal when clicking outside
+        document.getElementById("smtpModal").onclick = function(event) {
+            if (event.target === this) {
+                this.style.display = "none";
+            }
+        };
+
+        document.getElementById("saveSmtp").onclick = function() {
             const host = document.getElementById("smtpHost").value;
             const port = document.getElementById("smtpPort").value;
             const user = document.getElementById("smtpUser").value;
             const pass = document.getElementById("smtpPass").value;
 
+            if (!host || !port || !user || !pass) {
+                showToast("Please fill in all SMTP fields", 'error');
+                return;
+            }
+
+            // Show loading state
+            const saveBtn = this;
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<span class="loading"></span> Saving...';
+            saveBtn.disabled = true;
+
             fetch('/configure_smtp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({ smtpHost: host, smtpPort: port, smtpUser: user, smtpPass: pass })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showToast("SMTP settings saved!");
-                        document.getElementById("smtpModal").style.display = "none";
-                    } else {
-                        showToast("Failed to save SMTP settings!");
-                    }
+                body: new URLSearchParams({ 
+                    smtpHost: host, 
+                    smtpPort: port, 
+                    smtpUser: user, 
+                    smtpPass: pass 
                 })
-                .catch(error => {
-                    console.error("Error:", error);
-                });
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast("SMTP configuration saved successfully!", 'success');
+                    document.getElementById("smtpModal").style.display = "none";
+                    document.querySelector('.status-indicator').innerHTML = '<i class="fas fa-circle"></i> SMTP Configured';
+                } else {
+                    showToast("Failed to save SMTP configuration", 'error');
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                showToast("Error saving SMTP configuration", 'error');
+            })
+            .finally(() => {
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+            });
         };
 
+        // Real-time preview
         const htmlInput = document.getElementById('htmlInput');
         const emailPreview = document.getElementById('emailPreview');
 
         htmlInput.addEventListener('input', () => {
             const htmlContent = htmlInput.value;
-            emailPreview.srcdoc = `
-                <html>
-                    <head>
-                        <style>
-                            body {
-                                color: white; 
-                                background-color: #121212; 
-                            }
-                        </style>
-                    </head>
-                    <body>${htmlContent}</body>
-                </html>
-            `;
+            if (htmlContent.trim()) {
+                emailPreview.srcdoc = `
+                    <html>
+                        <head>
+                            <style>
+                                body {
+                                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+                                    line-height: 1.6;
+                                    color: #1f2937;
+                                    margin: 0;
+                                    padding: 20px;
+                                }
+                                * {
+                                    box-sizing: border-box;
+                                }
+                            </style>
+                        </head>
+                        <body>${htmlContent}</body>
+                    </html>
+                `;
+            } else {
+                emailPreview.srcdoc = `<div style='display: flex; align-items: center; justify-content: center; height: 100%; color: #64748b; font-family: Inter, sans-serif;'><i class='fas fa-eye' style='font-size: 2rem; margin-right: 0.5rem;'></i>Preview your email here</div>`;
+            }
         });
 
-        function showToast(message) {
+        // Form submission
+        document.getElementById("emailForm").addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const sendBtn = document.getElementById('sendButton');
+            const originalText = sendBtn.innerHTML;
+            sendBtn.innerHTML = '<span class="loading"></span> Sending...';
+            sendBtn.disabled = true;
+
+            const formData = new FormData(this);
+            
+            fetch('/send_emails', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message, 'success');
+                } else {
+                    showToast(data.message || "Failed to send emails", 'error');
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                showToast("Error sending emails", 'error');
+            })
+            .finally(() => {
+                sendBtn.innerHTML = originalText;
+                sendBtn.disabled = false;
+            });
+        });
+
+        // Toast notification system
+        function showToast(message, type = 'info') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
+            toast.className = `toast ${type}`;
             toast.classList.add('show');
 
             setTimeout(() => {
                 toast.classList.remove('show');
-            }, 3000);
+            }, 4000);
         }
+
+        // Add some sample HTML when the page loads
+        window.addEventListener('load', function() {
+            const sampleHTML = `<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .header { background: #f8f9fa; padding: 20px; text-align: center; }
+        .content { padding: 20px; }
+        .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Welcome, {{Name}}!</h1>
+    </div>
+    <div class="content">
+        <p>Hello {{Name}},</p>
+        <p>This is a sample email template. You can use variables from your CSV file like {{Email}}, {{Company}}, etc.</p>
+        <p>Best regards,<br>Your Team</p>
+    </div>
+    <div class="footer">
+        <p>© 2024 Mass Mailer. All rights reserved.</p>
+    </div>
+</body>
+</html>`;
+            
+            htmlInput.value = sampleHTML;
+            htmlInput.dispatchEvent(new Event('input'));
+        });
     </script>
 </body>
 
