@@ -578,6 +578,158 @@
              padding-top: 1rem;
              border-top: 1px solid var(--border);
          }
+
+         .csv-upload-container {
+             display: flex;
+             flex-direction: column;
+             gap: 1rem;
+         }
+
+         .csv-info {
+             background: rgba(68, 71, 90, 0.3);
+             border: 1px solid var(--border);
+             border-radius: var(--radius);
+             padding: 1rem;
+             margin-top: 0.5rem;
+         }
+
+         .csv-stats {
+             display: flex;
+             gap: 1.5rem;
+             margin-bottom: 1rem;
+             flex-wrap: wrap;
+         }
+
+         .stat-item {
+             display: flex;
+             align-items: center;
+             gap: 0.5rem;
+             color: var(--text-secondary);
+             font-size: 0.875rem;
+         }
+
+         .stat-item i {
+             color: var(--primary-color);
+         }
+
+         .btn-sm {
+             padding: 0.5rem 1rem;
+             font-size: 0.75rem;
+         }
+
+         .csv-preview-modal {
+             display: none;
+             position: fixed;
+             top: 0;
+             left: 0;
+             width: 100%;
+             height: 100%;
+             background: rgba(0, 0, 0, 0.8);
+             backdrop-filter: blur(10px);
+             justify-content: center;
+             align-items: center;
+             z-index: 1000;
+             animation: fadeIn 0.3s ease;
+         }
+
+         .csv-preview-content {
+             background: var(--surface);
+             border: 1px solid var(--border);
+             border-radius: var(--radius-lg);
+             width: 95%;
+             height: 90%;
+             max-width: 1200px;
+             display: flex;
+             flex-direction: column;
+             box-shadow: var(--shadow-lg);
+             animation: slideUp 0.3s ease;
+         }
+
+         .csv-preview-header {
+             display: flex;
+             align-items: center;
+             justify-content: space-between;
+             padding: 1.5rem 2rem;
+             border-bottom: 1px solid var(--border);
+             background: rgba(30, 41, 59, 0.5);
+         }
+
+         .csv-preview-header h3 {
+             font-size: 1.25rem;
+             font-weight: 600;
+             color: var(--text-primary);
+             display: flex;
+             align-items: center;
+             gap: 0.5rem;
+         }
+
+         .csv-preview-close {
+             background: none;
+             border: none;
+             color: var(--text-muted);
+             font-size: 1.5rem;
+             cursor: pointer;
+             padding: 0.5rem;
+             border-radius: 4px;
+             transition: all 0.3s ease;
+         }
+
+         .csv-preview-close:hover {
+             color: var(--text-primary);
+             background: rgba(68, 71, 90, 0.5);
+         }
+
+         .csv-preview-body {
+             flex: 1;
+             padding: 2rem;
+             overflow: auto;
+         }
+
+         .csv-table {
+             width: 100%;
+             border-collapse: collapse;
+             background: var(--surface);
+             border-radius: var(--radius);
+             overflow: hidden;
+             box-shadow: var(--shadow);
+         }
+
+         .csv-table th {
+             background: rgba(68, 71, 90, 0.5);
+             color: var(--text-primary);
+             font-weight: 600;
+             padding: 1rem;
+             text-align: left;
+             border-bottom: 1px solid var(--border);
+         }
+
+         .csv-table td {
+             padding: 0.75rem 1rem;
+             border-bottom: 1px solid var(--border);
+             color: var(--text-secondary);
+         }
+
+         .csv-table tr:hover {
+             background: rgba(68, 71, 90, 0.2);
+         }
+
+         .csv-error {
+             background: rgba(255, 68, 68, 0.1);
+             border: 1px solid rgba(255, 68, 68, 0.3);
+             border-radius: var(--radius);
+             padding: 1rem;
+             color: #ff4444;
+             margin-top: 0.5rem;
+         }
+
+         .csv-success {
+             background: rgba(80, 250, 123, 0.1);
+             border: 1px solid rgba(80, 250, 123, 0.3);
+             border-radius: var(--radius);
+             padding: 1rem;
+             color: var(--secondary-color);
+             margin-top: 0.5rem;
+         }
     </style>
 </head>
 
@@ -642,12 +794,43 @@
                                 <i class="fas fa-cog"></i>
                                 Configure SMTP
                             </button>
-                            <div class="file-upload">
-                                <input type="file" id="csvInput" name="csvFile" accept=".csv" class="file-input">
-                                <button type="button" id="uploadButton" class="btn btn-secondary">
-                                    <i class="fas fa-upload"></i>
-                                    Upload CSV
-                                </button>
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-users"></i> Recipients CSV
+                                </label>
+                                <div class="csv-upload-container">
+                                    <div class="file-upload">
+                                        <input type="file" id="csvInput" name="csvFile" accept=".csv" class="file-input">
+                                        <button type="button" id="uploadButton" class="btn btn-secondary">
+                                            <i class="fas fa-upload"></i>
+                                            Upload CSV
+                                        </button>
+                                        <a href="/csv_template" class="btn btn-secondary btn-sm" style="margin-left: 1rem;" download>
+                                            <i class="fas fa-download"></i>
+                                            Download CSV Template
+                                        </a>
+                                    </div>
+                                    <div class="csv-info" id="csvInfo" style="display: none;">
+                                        <div class="csv-stats">
+                                            <span class="stat-item">
+                                                <i class="fas fa-users"></i>
+                                                <span id="recipientCount">0</span> recipients
+                                            </span>
+                                            <span class="stat-item">
+                                                <i class="fas fa-columns"></i>
+                                                <span id="columnCount">0</span> columns
+                                            </span>
+                                        </div>
+                                        <button type="button" id="previewCsv" class="btn btn-secondary btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                            Preview Data
+                                        </button>
+                                        <button type="button" id="clearCsv" class="btn btn-secondary btn-sm">
+                                            <i class="fas fa-times"></i>
+                                            Clear
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                             <button type="submit" id="sendButton" class="btn btn-success">
                                 <i class="fas fa-paper-plane"></i>
@@ -677,6 +860,21 @@
                 <p>Made with ❤️ by <a href="https://harsharora.xyz" target="_blank" rel="noopener noreferrer">Harsh Arora</a></p>
             </div>
         </footer>
+    </div>
+
+    <!-- CSV Preview Modal -->
+    <div class="csv-preview-modal" id="csvPreviewModal">
+        <div class="csv-preview-content">
+            <div class="csv-preview-header">
+                <h3><i class="fas fa-table"></i> CSV Data Preview</h3>
+                <button type="button" class="csv-preview-close" id="closeCsvPreview">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="csv-preview-body" id="csvPreviewBody">
+                <!-- CSV table will be inserted here -->
+            </div>
+        </div>
     </div>
 
     <!-- HTML Editor Modal -->
@@ -795,6 +993,9 @@
             showToast("Content saved successfully!", 'success');
         };
 
+        // Global variable to store CSV data
+        let csvData = null;
+
         // File upload handling
         document.getElementById("uploadButton").onclick = function() {
             document.getElementById("csvInput").click();
@@ -803,9 +1004,234 @@
         document.getElementById("csvInput").onchange = function(event) {
             const file = event.target.files[0];
             if (file) {
-                showToast(`Selected file: ${file.name}`, 'info');
-                document.getElementById("uploadButton").innerHTML = `<i class="fas fa-check"></i> ${file.name}`;
+                processCSVFile(file);
             }
+        };
+
+        // Process CSV file with backend validation
+        function processCSVFile(file) {
+            // Basic frontend validation
+            if (!file.name.toLowerCase().endsWith('.csv')) {
+                showToast('Please select a valid CSV file', 'error');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('File size too large. Please select a file smaller than 5MB', 'error');
+                return;
+            }
+
+            // Show loading state
+            const uploadBtn = document.getElementById("uploadButton");
+            const originalText = uploadBtn.innerHTML;
+            uploadBtn.innerHTML = '<span class="loading"></span> Validating...';
+            uploadBtn.disabled = true;
+
+            // Create FormData and send to backend for validation
+            const formData = new FormData();
+            formData.append('csvFile', file);
+
+            fetch('/validate_csv', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Store validated CSV data
+                    csvData = {
+                        headers: data.data.headers,
+                        data: [], // We'll populate this from the file content
+                        fileName: file.name,
+                        validation: data.data
+                    };
+
+                    // Read file content for preview
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const csvContent = e.target.result;
+                            const lines = csvContent.split('\n');
+                            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+                            
+                            // Parse data rows
+                            for (let i = 1; i < lines.length; i++) {
+                                if (lines[i].trim()) {
+                                    const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+                                    if (values.length === headers.length) {
+                                        const row = {};
+                                        headers.forEach((header, index) => {
+                                            row[header] = values[index];
+                                        });
+                                        csvData.data.push(row);
+                                    }
+                                }
+                            }
+
+                            // Update UI
+                            updateCSVInfo();
+                            showToast(`Successfully validated CSV: ${data.data.valid_emails} valid emails, ${data.data.invalid_emails} invalid`, 'success');
+                            
+                            // Update upload button
+                            uploadBtn.innerHTML = `<i class="fas fa-check"></i> ${file.name}`;
+                            
+                            // Show CSV info section
+                            document.getElementById("csvInfo").style.display = "block";
+
+                            // Show validation details if there are issues
+                            if (data.data.invalid_emails > 0) {
+                                showToast(`Warning: ${data.data.invalid_emails} invalid emails found. Check preview for details.`, 'info');
+                            }
+
+                        } catch (error) {
+                            console.error('Error parsing CSV:', error);
+                            showToast('Error parsing CSV file', 'error');
+                        }
+                    };
+                    reader.readAsText(file);
+
+                } else {
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error validating CSV:', error);
+                showToast('Error validating CSV file', 'error');
+            })
+            .finally(() => {
+                uploadBtn.disabled = false;
+            });
+        }
+
+        // Update CSV information display
+        function updateCSVInfo() {
+            if (csvData) {
+                const totalRows = csvData.data.length;
+                const validEmails = csvData.validation ? csvData.validation.valid_emails : totalRows;
+                const invalidEmails = csvData.validation ? csvData.validation.invalid_emails : 0;
+                
+                document.getElementById("recipientCount").textContent = validEmails;
+                document.getElementById("columnCount").textContent = csvData.headers.length;
+                
+                // Update status indicator if there are validation issues
+                if (invalidEmails > 0) {
+                    document.getElementById("recipientCount").style.color = "#ffb86c"; // Warning color
+                } else {
+                    document.getElementById("recipientCount").style.color = "var(--text-secondary)";
+                }
+            }
+        }
+
+        // Preview CSV data
+        document.getElementById("previewCsv").onclick = function() {
+            if (!csvData) {
+                showToast('No CSV data to preview', 'error');
+                return;
+            }
+
+            const modal = document.getElementById("csvPreviewModal");
+            const previewBody = document.getElementById("csvPreviewBody");
+            
+            let contentHTML = '';
+            
+            // Add validation summary if available
+            if (csvData.validation) {
+                const validCount = csvData.validation.valid_emails;
+                const invalidCount = csvData.validation.invalid_emails;
+                const totalCount = csvData.data.length;
+                
+                contentHTML += `
+                    <div class="csv-validation-summary" style="margin-bottom: 2rem; padding: 1rem; background: rgba(68, 71, 90, 0.3); border-radius: var(--radius);">
+                        <h4 style="margin-bottom: 1rem; color: var(--text-primary);">Validation Summary</h4>
+                        <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                            <div style="color: var(--secondary-color);">
+                                <strong>${validCount}</strong> valid emails
+                            </div>
+                            <div style="color: ${invalidCount > 0 ? '#ff4444' : 'var(--text-muted)'};">
+                                <strong>${invalidCount}</strong> invalid emails
+                            </div>
+                            <div style="color: var(--text-secondary);">
+                                <strong>${totalCount}</strong> total rows
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Show invalid email details if any
+                if (csvData.validation.invalid_email_details && csvData.validation.invalid_email_details.length > 0) {
+                    contentHTML += `
+                        <div style="margin-bottom: 2rem; padding: 1rem; background: rgba(255, 68, 68, 0.1); border: 1px solid rgba(255, 68, 68, 0.3); border-radius: var(--radius);">
+                            <h4 style="margin-bottom: 1rem; color: #ff4444;">Invalid Emails</h4>
+                            <ul style="color: #ff4444; margin: 0; padding-left: 1.5rem;">
+                                ${csvData.validation.invalid_email_details.slice(0, 10).map(detail => `<li>${detail}</li>`).join('')}
+                                ${csvData.validation.invalid_email_details.length > 10 ? `<li>... and ${csvData.validation.invalid_email_details.length - 10} more</li>` : ''}
+                            </ul>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Create table HTML
+            contentHTML += '<table class="csv-table"><thead><tr>';
+            
+            // Headers
+            csvData.headers.forEach(header => {
+                contentHTML += `<th>${header}</th>`;
+            });
+            contentHTML += '</tr></thead><tbody>';
+            
+            // Data rows (show first 50 rows)
+            const rowsToShow = Math.min(50, csvData.data.length);
+            for (let i = 0; i < rowsToShow; i++) {
+                const row = csvData.data[i];
+                const isValidEmail = csvData.validation ? 
+                    csvData.validation.valid_emails > 0 && 
+                    is_valid_email(row.Email || '') : true;
+                
+                contentHTML += `<tr style="${!isValidEmail ? 'background: rgba(255, 68, 68, 0.1);' : ''}">`;
+                csvData.headers.forEach(header => {
+                    contentHTML += `<td>${row[header] || ''}</td>`;
+                });
+                contentHTML += '</tr>';
+            }
+            
+            contentHTML += '</tbody></table>';
+            
+            if (csvData.data.length > 50) {
+                contentHTML += `<p style="color: var(--text-muted); margin-top: 1rem; text-align: center;">
+                    Showing first 50 rows of ${csvData.data.length} total rows
+                </p>`;
+            }
+            
+            previewBody.innerHTML = contentHTML;
+            modal.style.display = "flex";
+        };
+
+        // Close CSV preview modal
+        document.getElementById("closeCsvPreview").onclick = function() {
+            document.getElementById("csvPreviewModal").style.display = "none";
+        };
+
+        // Close CSV preview when clicking outside
+        document.getElementById("csvPreviewModal").onclick = function(event) {
+            if (event.target === this) {
+                this.style.display = "none";
+            }
+        };
+
+        // Email validation function
+        function is_valid_email(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // Clear CSV data
+        document.getElementById("clearCsv").onclick = function() {
+            csvData = null;
+            document.getElementById("csvInput").value = '';
+            document.getElementById("uploadButton").innerHTML = '<i class="fas fa-upload"></i> Upload CSV';
+            document.getElementById("csvInfo").style.display = "none";
+            showToast('CSV data cleared', 'info');
         };
 
         // SMTP Modal handling
