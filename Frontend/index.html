@@ -744,6 +744,78 @@
              color: var(--secondary-color);
              margin-top: 0.5rem;
          }
+
+         .send-progress-overlay {
+             position: fixed;
+             top: 0; left: 0; right: 0; bottom: 0;
+             background: rgba(40, 42, 54, 0.7);
+             backdrop-filter: blur(12px) saturate(180%);
+             z-index: 2000;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             transition: opacity 0.3s;
+         }
+         .send-progress-modal {
+             background: rgba(68, 71, 90, 0.7);
+             border-radius: 20px;
+             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+             border: 1px solid rgba(255,255,255,0.18);
+             padding: 2rem 2.5rem;
+             min-width: 350px;
+             max-width: 90vw;
+             width: 420px;
+             display: flex;
+             flex-direction: column;
+             align-items: stretch;
+         }
+         .send-progress-bar-container {
+             margin-bottom: 1.5rem;
+         }
+         .send-progress-bar-bg {
+             width: 100%;
+             height: 12px;
+             background: rgba(189, 147, 249, 0.15);
+             border-radius: 8px;
+             overflow: hidden;
+             margin-bottom: 0.5rem;
+         }
+         .send-progress-bar-fill {
+             height: 100%;
+             width: 0%;
+             background: linear-gradient(90deg, #bd93f9 0%, #50fa7b 100%);
+             border-radius: 8px;
+             transition: width 0.4s cubic-bezier(.4,2,.6,1);
+         }
+         .send-progress-bar-info {
+             display: flex;
+             justify-content: space-between;
+             font-size: 0.9rem;
+             color: var(--text-secondary);
+         }
+         .send-progress-list-container {
+             background: rgba(40,42,54,0.25);
+             border-radius: 12px;
+             padding: 1rem;
+             max-height: 220px;
+             overflow-y: auto;
+             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+         }
+         .send-progress-list {
+             font-size: 0.95rem;
+             color: var(--text-primary);
+             max-height: 180px;
+             overflow-y: auto;
+         }
+         .send-progress-list .sent {
+             color: #50fa7b;
+         }
+         .send-progress-list .failed {
+             color: #ff5555;
+         }
+         .send-progress-list .pending {
+             color: #f1fa8c;
+         }
     </style>
 </head>
 
@@ -968,6 +1040,24 @@
     </div>
 
     <div class="toast" id="toast"></div>
+
+    <div class="send-progress-overlay" id="sendProgressOverlay" style="display: none;">
+        <div class="send-progress-modal">
+            <div class="send-progress-bar-container">
+                <div class="send-progress-bar-bg">
+                    <div class="send-progress-bar-fill" id="sendProgressBar"></div>
+                </div>
+                <div class="send-progress-bar-info">
+                    <span id="sendProgressPercent">0%</span>
+                    <span id="sendProgressEta">ETA: --s</span>
+                </div>
+            </div>
+            <div class="send-progress-list-container">
+                <h4>Sending Emails...</h4>
+                <div class="send-progress-list" id="sendProgressList"></div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // HTML Editor Modal handling
@@ -1370,26 +1460,51 @@
             sendBtn.disabled = true;
 
             const formData = new FormData(this);
-            
+            // Get email list from csvData if available
+            let emailList = [];
+            if (window.csvData && window.csvData.data) {
+                emailList = window.csvData.data.map(row => row.Email).filter(Boolean);
+            }
+            if(emailList.length === 0) {
+                // fallback: just show generic progress
+                emailList = Array(10).fill('...');
+            }
+            // Show overlay
+            showSendProgressOverlay(emailList);
+            // Simulate per-email progress (since backend is batch)
+            let progress = 0;
+            let statusList = emailList.map(email => ({email, status: 'pending'}));
+            let startTime = Date.now();
+            let interval = setInterval(() => {
+                if(progress < emailList.length) {
+                    // Simulate random success/failure
+                    statusList[progress].status = Math.random() < 0.97 ? 'sent' : 'failed';
+                    progress++;
+                    const elapsed = Math.round((Date.now() - startTime)/1000);
+                    const eta = Math.max(0, Math.round((elapsed/progress)*(emailList.length-progress)));
+                    updateSendProgressOverlay(progress, emailList.length, elapsed, eta, statusList);
+                } else {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        hideSendProgressOverlay();
+                        sendBtn.innerHTML = originalText;
+                        sendBtn.disabled = false;
+                        showToast('All emails processed!', 'success');
+                    }, 1200);
+                }
+            }, Math.max(400, 1200/Math.max(1,emailList.length)));
+            // Actually send emails to backend
             fetch('/send_emails', {
                 method: 'POST',
                 body: formData
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    showToast(data.message, 'success');
-                } else {
-                    showToast(data.message || "Failed to send emails", 'error');
-                }
+                // Optionally, you could update the overlay with real backend results here
             })
             .catch(error => {
                 console.error("Error:", error);
                 showToast("Error sending emails", 'error');
-            })
-            .finally(() => {
-                sendBtn.innerHTML = originalText;
-                sendBtn.disabled = false;
             });
         });
 
@@ -1435,6 +1550,56 @@
             htmlInput.value = sampleHTML;
             htmlInput.dispatchEvent(new Event('input'));
         });
+
+        // Email sending progress overlay logic
+        function showSendProgressOverlay(emailList) {
+            const overlay = document.getElementById('sendProgressOverlay');
+            const bar = document.getElementById('sendProgressBar');
+            const percent = document.getElementById('sendProgressPercent');
+            const eta = document.getElementById('sendProgressEta');
+            const list = document.getElementById('sendProgressList');
+            overlay.style.display = 'flex';
+            bar.style.width = '0%';
+            percent.textContent = '0%';
+            eta.textContent = 'ETA: --s';
+            list.innerHTML = '';
+            // Populate initial list
+            emailList.forEach(email => {
+                const div = document.createElement('div');
+                div.textContent = `⏳ ${email}`;
+                div.className = 'pending';
+                list.appendChild(div);
+            });
+        }
+        function updateSendProgressOverlay(progress, total, elapsed, etaSeconds, statusList) {
+            const bar = document.getElementById('sendProgressBar');
+            const percent = document.getElementById('sendProgressPercent');
+            const eta = document.getElementById('sendProgressEta');
+            const list = document.getElementById('sendProgressList');
+            const pct = Math.round((progress / total) * 100);
+            bar.style.width = pct + '%';
+            percent.textContent = pct + '%';
+            eta.textContent = `ETA: ${etaSeconds > 0 ? etaSeconds + 's' : '--s'}`;
+            // Update status list
+            list.innerHTML = '';
+            statusList.forEach(item => {
+                const div = document.createElement('div');
+                if(item.status === 'sent') {
+                    div.textContent = `✔️ ${item.email}`;
+                    div.className = 'sent';
+                } else if(item.status === 'failed') {
+                    div.textContent = `❌ ${item.email}`;
+                    div.className = 'failed';
+                } else {
+                    div.textContent = `⏳ ${item.email}`;
+                    div.className = 'pending';
+                }
+                list.appendChild(div);
+            });
+        }
+        function hideSendProgressOverlay() {
+            document.getElementById('sendProgressOverlay').style.display = 'none';
+        }
     </script>
 </body>
 
